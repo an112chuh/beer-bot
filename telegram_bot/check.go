@@ -23,7 +23,7 @@ func isDrink(text string) (bool, int) {
 }
 
 func isHelp(text string) bool {
-	return checkString(text, `help`)
+	return checkString(text, `help`) || checkString(text, `start`)
 }
 
 func checkString(text string, template string) bool {
