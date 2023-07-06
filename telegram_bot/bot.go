@@ -9,7 +9,7 @@ import (
 )
 
 func InitBot(IsDebug bool) (*tgbotapi.BotAPI, error) {
-	bot, err := tgbotapi.NewBotAPI("key:value")
+	bot, err := tgbotapi.NewBotAPI("key")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -37,7 +37,7 @@ func InitBot(IsDebug bool) (*tgbotapi.BotAPI, error) {
 							panic(err)
 						}
 					} else if ok, drinkType := isDrink(text); ok {
-						isFail, str := actions.Drink(groupID, userID, drinkType)
+						isFail, str := actions.Drink(groupID, userID, userName, drinkType)
 						if isFail {
 							var msgText string
 							switch drinkType {
@@ -65,7 +65,13 @@ func InitBot(IsDebug bool) (*tgbotapi.BotAPI, error) {
 							panic(err)
 						}
 					} else if isHelp(text) {
-						mes := fmt.Sprintf("%s, список команд: \n/beer - выпить пива\n/vodka - выпить водки\n/wine - выпить вина\n/profile - получить профиль", userName)
+						mes := fmt.Sprintf("%s, список команд: \n/beer - выпить пива\n/vodka - выпить водки\n/wine - выпить вина\n/profile - получить профиль\n/top_drink - топ алкашей", userName)
+						msg = tgbotapi.NewMessage(groupID, mes)
+						if _, err = bot.Send(msg); err != nil {
+							panic(err)
+						}
+					} else if isTop(text) {
+						mes := actions.GetTop(groupID)
 						msg = tgbotapi.NewMessage(groupID, mes)
 						if _, err = bot.Send(msg); err != nil {
 							panic(err)

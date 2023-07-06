@@ -18,7 +18,7 @@ var beerVolume = 0.5
 var vodkaVolume = 0.1
 var wineVolume = 0.2
 
-func Drink(IDGroup int64, IDUser int64, drinkType int) (isFail bool, reason string) {
+func Drink(IDGroup int64, IDUser int64, userName string, drinkType int) (isFail bool, reason string) {
 	checkUser(IDGroup, IDUser)
 	if isSobrFail(IDGroup, IDUser) {
 		return true, `Вы слишком пьяны, приходите как протрезвеете`
@@ -27,11 +27,11 @@ func Drink(IDGroup int64, IDUser int64, drinkType int) (isFail bool, reason stri
 	if isFail {
 		return true, fmt.Sprintf(`Приходите через %d мин`, 59-min)
 	}
-	drinking(IDGroup, IDUser, drinkType)
+	drinking(IDGroup, IDUser, userName, drinkType)
 	return false, ``
 }
 
-func drinking(IDGroup int64, IDUser int64, drinkType int) {
+func drinking(IDGroup int64, IDUser int64, userName string, drinkType int) {
 	db := config.GetConnection()
 	var sobr int
 	var volume float64
@@ -53,8 +53,8 @@ func drinking(IDGroup int64, IDUser int64, drinkType int) {
 		sobr = 0
 		volume = 0
 	}
-	query += `$2, updated_at = $3 WHERE id_group = $4 AND id_user = $5`
-	params := []any{sobr, volume, time.Now(), IDGroup, IDUser}
+	query += `$2, updated_at = $3, user_name = $4, count = count + 1 WHERE id_group = $5 AND id_user = $6`
+	params := []any{sobr, volume, time.Now(), userName, IDGroup, IDUser}
 	_, err := db.Exec(query, params...)
 	if err != nil {
 		fmt.Println(err)

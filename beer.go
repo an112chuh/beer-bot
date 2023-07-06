@@ -8,6 +8,7 @@ import (
 
 func main() {
 	config.InitDb()
+	daemon.FillCount()
 	go daemon.ReduceSobriety()
 	telegrambot.InitBot(true)
 }

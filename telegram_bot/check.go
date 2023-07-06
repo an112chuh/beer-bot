@@ -22,6 +22,10 @@ func isDrink(text string) (bool, int) {
 	return false, -1
 }
 
+func isTop(text string) bool {
+	return strings.ToLower(text) == `топ` || checkString(text, `top_drink`)
+}
+
 func isHelp(text string) bool {
 	return checkString(text, `help`) || checkString(text, `start`)
 }

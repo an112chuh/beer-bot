@@ -12,6 +12,32 @@ type alcoSums struct {
 	WineSum  float64
 }
 
+type alcoTop struct {
+	IDUser   int
+	UserName string
+	Count    int
+}
+
+func GetTop(IDGroup int64) string {
+	var top []alcoTop
+	db := config.GetConnection()
+	query := `SELECT id_user, user_name, count FROM users WHERE id_group = $1 AND user_name IS NOT NULL ORDER BY count DESC LIMIT 10 `
+	params := []any{IDGroup}
+	rows, err := db.Query(query, params...)
+	if err != nil {
+		fmt.Println(err)
+	}
+	for rows.Next() {
+		var t alcoTop
+		err := rows.Scan(&t.IDUser, &t.UserName, &t.Count)
+		if err != nil {
+			fmt.Println(err)
+		}
+		top = append(top, t)
+	}
+	return buildTopMessage(top)
+}
+
 func GetData(IDGroup int64, IDUser int64) (sobriety int, sums alcoSums) {
 	checkUser(IDGroup, IDUser)
 	db := config.GetConnection()
@@ -71,4 +97,23 @@ func isTimeoutFail(IDGroup int64, IDUser int64) (bool, int, int) {
 		return true, int(time.Since(date).Minutes()), int(time.Since(date).Seconds())
 	}
 	return false, 0, 0
+}
+
+func buildTopMessage(top []alcoTop) string {
+	res := "Топ алкашей:"
+	for _, t := range top {
+		var word string
+		switch t.Count % 10 {
+		case 0, 1, 5, 6, 7, 8, 9:
+			word = "раз"
+		case 2, 3, 4:
+			if t.Count%100 > 10 && t.Count%100 < 20 {
+				word = "раз"
+			} else {
+				word = "раза"
+			}
+		}
+		res += fmt.Sprintf("\n%s - Выпил %d %s", t.UserName, t.Count, word)
+	}
+	return res
 }
